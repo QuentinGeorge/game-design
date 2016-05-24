@@ -10,10 +10,14 @@
 
 * * *
 
+Hébergement du jeu&nbsp;: http://hepl01.cblue.be/~user27/game/
+
+* * *
+
 ## Document Game Design
 
 Le jeu sera de type "runner". </br>
-Un "Ninja" cours et des obstacles de plusieurs types se présentent à lui :
+Un "Ninja" cours et des obstacles de plusieurs types se présentent à lui&nbsp;:
 </br> - Des murs de tailles variables au dessus des quels il doit sauter.
 </br> - Des ennemis qu'il doit détruire en leur lancant des "Shuriken".
 
