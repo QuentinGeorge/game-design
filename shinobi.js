@@ -9,6 +9,7 @@
     Shinobi = function( oApp ) {
 
         var game = this,
+            SmallWalls,
             iLives,
             aGroundDx = [],
             aHeadDx = [];
@@ -88,7 +89,7 @@
                 "dw": 185,
                 "dh": 320
             },
-            "speed": 3,
+            "speed": 6,
             "init": function() {
                 while ( this.frame.dx <= ( this.frame.sw * 4 ) ) {
                     aGroundDx.push( this.frame.dx );
@@ -194,10 +195,7 @@
                     "step": 0
                 };
                 this.state = {
-                    "isInDangerZone": false,
-                    "speed": 0,
-                    "acceleration": 0,
-                    "boost": 0
+                    "isInDangerZone": false
                 };
                 this.score = {
                     "current": 0,
@@ -205,11 +203,13 @@
                 };
                 this.position = {
                     "top": 0,
-                    "bottom": 0
+                    "bottom": 0,
+                    "left": 0,
+                    "right": 0
                 };
                 this.destinationFrame = {
                     "dx": ( game.app.width / 3 ) - 100,
-                    "dy": game.app.height - ( 115 + 104 ),
+                    "dy": game.app.height - ( 117 + 104 ),
                     "dw": 50,
                     "dh": 52
                 };
@@ -241,15 +241,8 @@
                 if ( oEvent ) {
                     if ( oEvent.type === "click" || ( oEvent.type === "keyup" && oEvent.keyCode === 32 ) ) {
                         if ( !game.ended ) {
-                            if ( !self.state.acceleration ) {
-                                // since we know that this is the first click/keypress on shinobi, we can generate tubes here
-                                // TubesPair.generate( 2 );
-                                game.started = true;
-                                self.state.acceleration = 0.4;
-                                self.state.boost = -5;
-                            } else {
-                                self.state.speed = self.state.boost;
-                            }
+                            SmallWalls.generate( 3 );
+                            game.started = true;
                         } else {
                             // restart game
                             return game.init();
@@ -264,32 +257,27 @@
                     return;
                 }
 
-                // handle game over
-                if ( self.destinationFrame.dy >= game.ground.frame.dy - self.destinationFrame.dh / 2 ) {
-                    game.over();
-                } else {
-                    self.state.speed += self.state.acceleration;
-                    self.destinationFrame.dy += self.state.speed;
-                }
-
                 // update hitzone borders
-                self.position.top = self.destinationFrame.dy - self.destinationFrame.dh / 2;
-                self.position.bottom = self.destinationFrame.dy + self.destinationFrame.dh / 2;
-                self.position.left = self.destinationFrame.dx - self.destinationFrame.dw / 2;
-                self.position.right = self.destinationFrame.dx + self.destinationFrame.dw / 2;
+                self.position.top = self.destinationFrame.dy + self.destinationFrame.dh;
+                // top: 341
+                self.position.bottom = self.destinationFrame.dy + self.destinationFrame.dh * 2;
+                // bottom: 393
+                self.position.left = self.destinationFrame.dx + self.destinationFrame.dw;
+                // left: 188
+                self.position.right = self.destinationFrame.dx + self.destinationFrame.dw * 2;
+                // right: 238
 
-                // check tubes hitzones collisions
-                // game.tubes.forEach( function( oTubesPair ) {
-                //     var oPosition = self.position;
-                //
-                //     if ( oPosition.left > oTubesPair.frame.top.dx - self.destinationFrame.dw && oPosition.right < oTubesPair.frame.top.dx + oTubesPair.frame.top.dw ) {
-                //         if ( oPosition.top < oTubesPair.frame.top.dy + oTubesPair.frame.top.dh || oPosition.bottom > oTubesPair.frame.bottom.dy ) {
-                //             game.over();
-                //         } else {
-                //             self.state.isInDangerZone = true;
-                //         }
-                //     }
-                // } );
+                // check Walls hitzones collisions
+                game.Walls.forEach( function( oWalls ) {
+                    var oPosition = self.position,
+                        oSmallWalls = oWalls.frame.small;
+
+                    if ( oPosition.left < oSmallWalls.dx + oSmallWalls.dw && oPosition.left + ( oPosition.right - oPosition.left ) > oSmallWalls.dx && oPosition.top < oSmallWalls.dy + oSmallWalls.dh && ( oPosition.bottom - oPosition.top ) + oPosition.top > oSmallWalls.dy ) {
+                        game.over();
+                    } else {
+                        self.state.isInDangerZone = true;
+                    }
+                } );
 
                 // update score
                 if ( self.state.isInDangerZone ) {
@@ -304,8 +292,140 @@
         };
 
         // Walls
+        SmallWalls = function( iDxPosition ) {
+            this.frame = {
+                "small": {
+                    "sx": 222,
+                    "sy": 415,
+                    "sw": 28,
+                    "sh": 97,
+                    "dx": iDxPosition,
+                    "dy": game.app.height - ( 112 + 97 ),
+                    "dw": 28,
+                    "dh": 97
+                }
+            };
+        };
+
+        SmallWalls.prototype.draw = function() {
+            game._drawSpriteFromFrame( this.frame.small );
+        };
+
+        SmallWalls.prototype.update = function() {
+            this.frame.small.dx -= game.ground.speed;
+
+            if ( this.frame.small.dx < ( this.frame.small.dw * -1 ) ) {
+                this.frame.small.dx = game.app.width;
+            }
+            this.draw();
+        };
+
+        SmallWalls.lastGeneratedWallWidth = -1 * ( 50 + Math.floor( Math.random() * 250 ) );
+
+        SmallWalls.generateNextWallWidth = function() {
+            var iMultiplier = Math.round( Math.random() ) % 2 ? 1 : -1,
+                iMaxGap = 100,
+                iNewValue = SmallWalls.lastGeneratedWallWidth + Math.floor( Math.random() * iMaxGap ) * iMultiplier;
+
+            ( iNewValue > -50 ) && ( iNewValue = -50 );
+            ( iNewValue < -300 ) && ( iNewValue = -300 );
+
+            SmallWalls.lastGeneratedWallWidth = iNewValue;
+
+            return iNewValue;
+        };
+
+        SmallWalls.generate = function( iAmount ) {
+            var i = 0,
+                iWallStartingPosition = 714,
+                iWallGap = 180;
+
+            for ( ; i < iAmount; i++ ) {
+                game.Walls.push( new SmallWalls( iWallStartingPosition + ( i * iWallGap ) ) );
+            }
+        };
 
         // Game Over Screen
+        this.gameOverScreen = {
+            "frames": {
+                "title": {
+                    "sx": 784,
+                    "sy": 114,
+                    "sw": 204,
+                    "sh": 56,
+                    "dx": ( game.app.width - 204 ) / 2,
+                    "dy": 75,
+                    "dw": 204,
+                    "dh": 56
+                },
+                "modal": {
+                    "sx": 0,
+                    "sy": 516,
+                    "sw": 238,
+                    "sh": 126,
+                    "dx": ( game.app.width - 238 ) / 2,
+                    "dy": 150,
+                    "dw": 238,
+                    "dh": 126
+                },
+                "cyphers": {
+                    "sx": 276,
+                    "sw": 12,
+                    "sh": 14,
+                    "sy": {
+                        "0": 646,
+                        "1": 664,
+                        "2": 698,
+                        "3": 716,
+                        "4": 750,
+                        "5": 768,
+                        "6": 802,
+                        "7": 820,
+                        "8": 854,
+                        "9": 872
+                    }
+                },
+                "medal": {
+                    "sx": 242,
+                    "sy": 564,
+                    "sw": 44,
+                    "sh": 44,
+                    "dx": 0,
+                    "dy": 0,
+                    "dw": 44,
+                    "dh": 44
+                }
+            },
+            "draw": function() {
+                game._drawSpriteFromFrame( this.frames.title );
+                game._drawSpriteFromFrame( this.frames.modal );
+            },
+            "drawScore": function( iScore, bBestScore ) {
+                var aScoreParts = ( iScore + "" ).split( "" ),
+                    self = this;
+
+                // drawing score
+                aScoreParts.reverse().forEach( function( sScorePart, iIndex ) {
+                    var iDxPosition = game.app.width / 2 + 91 - self.frames.cyphers.sw;
+
+                    game._drawSpriteFromFrame( {
+                        "sx": self.frames.cyphers.sx,
+                        "sy": self.frames.cyphers.sy[ sScorePart ],
+                        "sw": self.frames.cyphers.sw,
+                        "sh": self.frames.cyphers.sh,
+                        "dx": iDxPosition - ( iIndex * ( self.frames.cyphers.sw + 2 ) ),
+                        "dy": self.frames.modal.dy + ( bBestScore ? 73 : 39 ),
+                        "dw": self.frames.cyphers.sw,
+                        "dh": self.frames.cyphers.sh
+                    } );
+                } );
+            },
+            "drawMedal": function() {
+                this.frames.medal.dx = game.app.width / 2 - 87;
+                this.frames.medal.dy = this.frames.modal.dy + 44;
+                game._drawSpriteFromFrame( this.frames.medal );
+            }
+        };
 
         // Utils
         this._drawSpriteFromFrame = function( oFrame, iNewDx ) {
@@ -338,14 +458,14 @@
             this.app.context.clearRect( 0, 0, this.app.width, this.app.height );
             // draw: background
             this.background.update();
-            // // draw & animate: tubes
-            // this.tubes.forEach( function( oTubesPair ) {
-            //     oTubesPair.update();
-            // } );
             // draw & animate: ground
             this.ground.update();
             // draw: displayLives
             this.displayLives.draw();
+            // draw & animate: Walls
+            this.Walls.forEach( function( oWalls ) {
+                oWalls.update();
+            } );
             // draw & animate: shinobi
             this.shinobi.update();
             if ( this.time.current - this.time.start > 50 ) {
@@ -409,10 +529,10 @@
             iLives = 3;
             this.started = false;
             this.ended = false;
-            // this.tubes = [];
+            this.Walls = [];
             this.ground.init();
             this.displayLives.init();
-            this.shinobi.init(); // resetting variables for shinobi
+            this.shinobi.init();
             this.time.start = Date.now();
             // launch animation
             this.animate();
