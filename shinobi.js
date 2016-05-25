@@ -63,7 +63,7 @@
                 "dw": 820,
                 "dh": 410
             },
-            "speed": 1,
+            "speed": 0,
             "draw": function() {
                 game._drawSpriteFromFrame( this.frame );
                 game._drawSpriteFromFrame( this.frame, ( this.frame.dx + 820 ) );
@@ -89,7 +89,7 @@
                 "dw": 185,
                 "dh": 320
             },
-            "speed": 6,
+            "speed": 0,
             "init": function() {
                 while ( this.frame.dx <= ( this.frame.sw * 4 ) ) {
                     aGroundDx.push( this.frame.dx );
@@ -151,51 +151,84 @@
 
         // Shinobi
         this.shinobi = {
-            "frames": [
-                {
-                    "sx": 0,
-                    "sy": 880,
-                    "sw": 50,    // 47
-                    "sh": 52
-                },
-                {
-                    "sx": 54,
-                    "sy": 880,
-                    "sw": 50,    // 47
-                    "sh": 52
-                },
-                {
-                    "sx": 109,
-                    "sy": 880,
-                    "sw": 50,    // 47
-                    "sh": 52
-                },
-                {
-                    "sx": 167,
-                    "sy": 880,
-                    "sw": 50,    // 44
-                    "sh": 52
-                },
-                {
-                    "sx": 226,
-                    "sy": 880,
-                    "sw": 50,    // 47
-                    "sh": 52
-                },
-                {
-                    "sx": 284,
-                    "sy": 880,
-                    "sw": 50,
-                    "sh": 52
+            "frames": {
+                "run": [
+                    {
+                        "sx": 0,
+                        "sy": 880,
+                        "sw": 50,    // 47
+                        "sh": 52
+                    },
+                    {
+                        "sx": 54,
+                        "sy": 880,
+                        "sw": 50,    // 47
+                        "sh": 52
+                    },
+                    {
+                        "sx": 109,
+                        "sy": 880,
+                        "sw": 50,    // 47
+                        "sh": 52
+                    },
+                    {
+                        "sx": 167,
+                        "sy": 880,
+                        "sw": 50,    // 44
+                        "sh": 52
+                    },
+                    {
+                        "sx": 226,
+                        "sy": 880,
+                        "sw": 50,    // 47
+                        "sh": 52
+                    },
+                    {
+                        "sx": 284,
+                        "sy": 880,
+                        "sw": 50,
+                        "sh": 52
+                    }
+                ],
+                "jump": {
+                    "up": [
+                        {
+                            "sx": 0,
+                            "sy": 944,
+                            "sw": 34,
+                            "sh": 64
+                        },
+                        {
+                            "sx": 58,
+                            "sy": 944,
+                            "sw": 34,
+                            "sh": 64
+                        }
+                    ],
+                    "down": [
+                        {
+                            "sx": 106,
+                            "sy": 951,
+                            "sw": 44,
+                            "sh": 57
+                        },
+                        {
+                            "sx": 156,
+                            "sy": 951,
+                            "sw": 44,
+                            "sh": 57
+                        }
+                    ]
                 }
-            ],
+            },
             "init": function() {
                 this.animation = {
-                    "maxSteps": this.frames.length,
+                    "maxSteps": this.frames.run.length,
                     "step": 0
                 };
                 this.state = {
-                    "isInDangerZone": false
+                    "isInDangerZone": false,
+                    "acceleration": 0
                 };
                 this.score = {
                     "current": 0,
@@ -207,16 +240,28 @@
                     "left": 0,
                     "right": 0
                 };
-                this.destinationFrame = {
+                this.runDestinationFrame = {
                     "dx": ( game.app.width / 3 ) - 100,
                     "dy": game.app.height - ( 117 + 104 ),
                     "dw": 50,
                     "dh": 52
                 };
+                this.jumpDestinationFrame = {
+                    "dx": this.runDestinationFrame.dx + ( ( this.runDestinationFrame.dw - 34) * 2 ),
+                    "dy": this.runDestinationFrame.dy - ( ( 64 - this.runDestinationFrame.dh ) * 2 ),
+                    "dw": 34,
+                    "dh": 64
+                };
+                this.jumpInAir = false;
+                this.jumpTop = false;
+                this.jumpDown = false;
+                this.jumpTemp = false;
+                this.jumpTimeStarted = 0;
+                this.jumpTimeCurrent = 0;
+                this.destinationFrame = this.runDestinationFrame;
             },
-            "draw": function( iStep ) {
+            "draw": function( oFrom ) {
                 var oContext = game.app.context,
-                    oFrom = this.frames[ iStep ],
                     oDest = this.destinationFrame;
 
                 oContext.save();
@@ -234,6 +279,72 @@
                 );
                 oContext.restore();
             },
+            "run": function() {
+                var iStep = this.animation.step,
+                    oFrom = this.frames.run[ iStep ];
+
+                this.destinationFrame = this.runDestinationFrame;
+
+                this.draw( oFrom );
+            },
+            "jump": function() {
+                var iStep = this.animation.step,
+                    oFrom = {},
+                    iMaxJump = this.runDestinationFrame.dy - ( game.Walls[ 0 ].frame.small.dh + this.jumpDestinationFrame.dh );
+
+                this.jumpInAir = true;
+
+                if ( this.destinationFrame.dy <= iMaxJump ) {
+                    this.jumpTop = true;
+                }
+
+                // Time staying in the air before falling
+                if ( this.jumpTimeCurrent - this.jumpTimeStarted >= 100 ) {
+                    this.jumpDown = true;
+                }
+
+                if ( this.destinationFrame.dy > iMaxJump && this.jumpTop == false ) {
+                    // Rising
+                    this.jumpDestinationFrame.dy -= game.ground.speed;
+                    if ( iStep < this.animation.maxSteps / 2 ) {
+                        oFrom = this.frames.jump.up[ 0 ];
+                    } else {
+                        oFrom = this.frames.jump.up[ 1 ];
+                    }
+                    this.jumpDestinationFrame.dw = this.frames.jump.up[ 0 ].sw;
+                    this.jumpDestinationFrame.dh = this.frames.jump.up[ 0 ].sh;
+                } else {
+                    // Create time count
+                    this.jumpTimeCurrent = Date.now();
+                    if ( this.jumpTemp == false ) {
+                        this.jumpTimeStarted = Date.now();
+                        this.jumpTemp = true;
+                    }
+                    // Falling
+                    if ( this.jumpDown == true ) {
+                        this.jumpDestinationFrame.dy += game.ground.speed;
+                        if ( iStep < this.animation.maxSteps / 2 ) {
+                            oFrom = this.frames.jump.down[ 0 ];
+                        } else {
+                            oFrom = this.frames.jump.down[ 1 ];
+                        }
+                        this.jumpDestinationFrame.dw = this.frames.jump.down[ 0 ].sw;
+                        this.jumpDestinationFrame.dh = this.frames.jump.down[ 0 ].sh;
+                    } else {
+                        // Continue to apply jump up frames during the time we are staying in the air.
+                        if ( iStep < this.animation.maxSteps / 2 ) {
+                            oFrom = this.frames.jump.up[ 0 ];
+                        } else {
+                            oFrom = this.frames.jump.up[ 1 ];
+                        }
+                        this.jumpDestinationFrame.dw = this.frames.jump.up[ 0 ].sw;
+                        this.jumpDestinationFrame.dh = this.frames.jump.up[ 0 ].sh;
+                    }
+                }
+
+                this.destinationFrame = this.jumpDestinationFrame;
+                this.draw( oFrom );
+            },
             "update": function( oEvent ) {
                 var self = this;
 
@@ -241,14 +352,37 @@
                 if ( oEvent ) {
                     if ( oEvent.type === "click" || ( oEvent.type === "keyup" && oEvent.keyCode === 32 ) ) {
                         if ( !game.ended ) {
-                            SmallWalls.generate( 3 );
-                            game.started = true;
+                            if ( !self.state.acceleration ) {
+                                // since we know that this is the first click/keypress on bird, we can generate tubes here
+                                SmallWalls.generate( 3 );
+                                game.started = true;
+                                self.state.acceleration = 3;
+                                game.ground.speed += self.state.acceleration;
+                            } else {
+                                //  If he isn't already in the air, he can jump
+                                if ( self.jumpInAir == false ) {
+                                    // resetting jump temporaries variables
+                                    self.jumpTop = false;
+                                    self.jumpDown = false;
+                                    self.jumpTemp = false;
+                                    self.jumpTimeStarted = 0;
+                                    self.jumpTimeCurrent = 0;
+                                    self.jump();
+                                }
+                            }
                         } else {
                             // restart game
                             return game.init();
                         }
                     } else {
                         return;
+                    }
+                } else {
+                    if ( this.destinationFrame.dy < this.runDestinationFrame.dy ) {
+                        self.jump();
+                    } else {
+                        self.jumpInAir = false;
+                        self.run();
                     }
                 }
 
@@ -467,12 +601,11 @@
                 oWalls.update();
             } );
             // draw & animate: shinobi
-            this.shinobi.update();
             if ( this.time.current - this.time.start > 50 ) {
                 this.time.start = Date.now();
                 ( ++this.shinobi.animation.step < this.shinobi.animation.maxSteps ) || ( this.shinobi.animation.step = 0 );
             }
-            this.shinobi.draw( this.shinobi.animation.step );
+            this.shinobi.update();
             // draw start screen if needed
             if ( !game.started ) {
                 this.starting.draw();
@@ -527,15 +660,17 @@
             }
             // reset some variables
             iLives = 3;
-            this.started = false;
-            this.ended = false;
-            this.Walls = [];
-            this.ground.init();
-            this.displayLives.init();
-            this.shinobi.init();
-            this.time.start = Date.now();
+            game.ground.speed = 3;
+            game.background.speed = game.ground.speed / 4;
+            game.started = false;
+            game.ended = false;
+            game.Walls = [];
+            game.ground.init();
+            game.displayLives.init();
+            game.shinobi.init();
+            game.time.start = Date.now();
             // launch animation
-            this.animate();
+            game.animate();
         };
 
         // Load spritesheet
