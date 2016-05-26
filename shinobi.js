@@ -350,11 +350,11 @@
 
                 // handle event. we ensure that the sended event is the good one.
                 if ( oEvent ) {
-                    if ( oEvent.type === "click" || ( oEvent.type === "keyup" && oEvent.keyCode === 32 ) ) {
+                    if ( oEvent.type === "mousedown" || ( oEvent.type === "keydown" && oEvent.keyCode === 32 ) ) {
                         if ( !game.ended ) {
                             if ( !self.state.acceleration ) {
                                 // since we know that this is the first click/keypress on bird, we can generate tubes here
-                                SmallWalls.generate( 3 );
+                                SmallWalls.generate();
                                 game.started = true;
                                 self.state.acceleration = 3;
                                 game.ground.speed += self.state.acceleration;
@@ -441,42 +441,51 @@
             };
         };
 
+        SmallWalls.lastGeneratedWallWidth = game.app.width; // Init whith canvas width to be sure that the first wall will be created far enought.
+        SmallWalls.newWallWidth = 0;
+        SmallWalls.wallGap = 350; // Minimal value between walls
+        SmallWalls.wallOffsetHasard = 500; // More this value is big, more the gap between walls can be higher.
+
         SmallWalls.prototype.draw = function() {
             game._drawSpriteFromFrame( this.frame.small );
         };
 
         SmallWalls.prototype.update = function() {
+            var i = 0,
+                iWallDxMax = 0,
+                iWallWidth;
+
             this.frame.small.dx -= game.ground.speed;
 
-            if ( this.frame.small.dx < ( this.frame.small.dw * -1 ) ) {
-                this.frame.small.dx = game.app.width;
+            for ( ; i < game.Walls.length; i++ ) {
+                if ( game.Walls[ i ].frame.small.dx > iWallDxMax ) {
+                    iWallDxMax = game.Walls[ i ].frame.small.dx;
+                }
             }
+            SmallWalls.lastGeneratedWallWidth = iWallDxMax; // Allways record the position of the latest created wall
+
+            if ( SmallWalls.lastGeneratedWallWidth < game.app.width - SmallWalls.wallGap ) {
+                SmallWalls.generate();
+            } // If we don't have enought ostacles, we generate more walls
+
+            if ( this.frame.small.dx < ( this.frame.small.dw * -1 ) ) {
+                this.frame.small.dx = SmallWalls.generateNextWall();
+            } // When the wall go out of the canvas, restart his position with a new one
+
             this.draw();
         };
 
-        SmallWalls.lastGeneratedWallWidth = -1 * ( 50 + Math.floor( Math.random() * 250 ) );
+        SmallWalls.generateNextWall = function() {
+            var iNewValue = 0;
 
-        SmallWalls.generateNextWallWidth = function() {
-            var iMultiplier = Math.round( Math.random() ) % 2 ? 1 : -1,
-                iMaxGap = 100,
-                iNewValue = SmallWalls.lastGeneratedWallWidth + Math.floor( Math.random() * iMaxGap ) * iMultiplier;
-
-            ( iNewValue > -50 ) && ( iNewValue = -50 );
-            ( iNewValue < -300 ) && ( iNewValue = -300 );
-
-            SmallWalls.lastGeneratedWallWidth = iNewValue;
+            SmallWalls.newWallWidth = SmallWalls.lastGeneratedWallWidth + Math.floor( Math.random() * SmallWalls.wallOffsetHasard ) + SmallWalls.wallGap;
+            iNewValue = SmallWalls.newWallWidth;
 
             return iNewValue;
         };
 
-        SmallWalls.generate = function( iAmount ) {
-            var i = 0,
-                iWallStartingPosition = 714,
-                iWallGap = 180;
-
-            for ( ; i < iAmount; i++ ) {
-                game.Walls.push( new SmallWalls( iWallStartingPosition + ( i * iWallGap ) ) );
-            }
+        SmallWalls.generate = function() {
+            game.Walls.push( new SmallWalls( SmallWalls.generateNextWall() ) );
         };
 
         // Game Over Screen
@@ -654,8 +663,8 @@
         this.init = function() {
             // declare click & keyup events
             if ( !this.eventsSetted ) { // we need to be sure to listen to events only once. we use a boolean to do it.
-                this.app.canvas.addEventListener( "click", this.shinobi.update.bind( this.shinobi ) );
-                window.addEventListener( "keyup", this.shinobi.update.bind( this.shinobi ) );
+                this.app.canvas.addEventListener( "mousedown", this.shinobi.update.bind( this.shinobi ) );
+                window.addEventListener( "keydown", this.shinobi.update.bind( this.shinobi ) );
                 this.eventsSetted = true;
             }
             // reset some variables
