@@ -8,7 +8,7 @@
 
     Shinobi = function( oApp ) {
 
-        var game = this,
+        var game = this, // eslint-disable-line consistent-this
             SmallWall,
             Ennemie,
             EnnemyKunai,
@@ -79,19 +79,6 @@
         };
 
         // Ground
-        // this.ground = {
-        //     "frame": {
-        //         "sx": 0,
-        //         "sy": 415,
-        //         "sw": 185,
-        //         "sh": 320,
-        //         "dx": 0,
-        //         "dy": game.app.height - 320,
-        //         "dw": 185,
-        //         "dh": 320
-        //     },
-                    // initial ground
-
         this.ground = {
             "frame": {
                 "sx": 0,
@@ -114,7 +101,9 @@
                 game._drawSpriteFromFrame( this.frame, aGroundDx[ i ] );
             },
             "update": function() {
-                for ( var i = 0; i < aGroundDx.length; i++ ) {
+                var i = 0;
+
+                for ( ; i < aGroundDx.length; i++ ) {
                     if ( aGroundDx[ i ] <= ( this.frame.sw * -1 ) ) {
                         aGroundDx[ i ] += 925;
                     }
@@ -155,9 +144,11 @@
                 }
             },
             "draw": function() {
+                var i = 0;
+
                 game._drawSpriteFromFrame( this.frames.background );
                 // draw heads
-                for ( var i = 0; i < game.lives; i++ ) {
+                for ( ; i < game.lives; i++ ) {
                     game._drawSpriteFromFrame( this.frames.head, aHeadDx[ i ] );
                 }
             }
@@ -245,8 +236,7 @@
                     "acceleration": 0
                 };
                 this.score = {
-                    "current": 0,
-                    "previous": 0
+                    "current": 0
                 };
                 this.position = {
                     "top": 0,
@@ -261,7 +251,7 @@
                     "dh": 52
                 };
                 this.jumpDestinationFrame = {
-                    "dx": this.runDestinationFrame.dx + ( ( this.runDestinationFrame.dw - 34) * 2 ),
+                    "dx": this.runDestinationFrame.dx + ( ( this.runDestinationFrame.dw - 34 ) * 2 ),
                     "dy": this.runDestinationFrame.dy - ( ( 64 - this.runDestinationFrame.dh ) * 2 ),
                     "dw": 34,
                     "dh": 64
@@ -317,7 +307,7 @@
                     this.jumpDown = true;
                 }
 
-                if ( this.destinationFrame.dy > iMaxJump && this.jumpTop == false ) {
+                if ( this.destinationFrame.dy > iMaxJump && this.jumpTop === false ) {
                     // Rising
                     this.jumpDestinationFrame.dy -= game.ground.speed;
                     if ( iStep < this.animation.maxSteps / 2 ) {
@@ -330,12 +320,12 @@
                 } else {
                     // Create time count
                     this.jumpTimeCurrent = Date.now();
-                    if ( this.jumpTemp == false ) {
+                    if ( this.jumpTemp === false ) {
                         this.jumpTimeStarted = Date.now();
                         this.jumpTemp = true;
                     }
                     // Falling
-                    if ( this.jumpDown == true ) {
+                    if ( this.jumpDown === true ) {
                         this.jumpDestinationFrame.dy += game.ground.speed;
                         if ( iStep < this.animation.maxSteps / 2 ) {
                             oFrom = this.frames.jump.down[ 0 ];
@@ -366,23 +356,24 @@
                 if ( oEvent ) {
                     if ( oEvent.type === "mousedown" || ( oEvent.type === "keydown" && oEvent.keyCode === 32 ) ) {
                         if ( !game.ended ) {
+                            //  If he isn't already in the air, he can jump
+                            if ( self.jumpInAir === false && self.state.acceleration > 0 ) {
+                                // resetting jump temporaries variables
+                                self.jumpTop = false;
+                                self.jumpDown = false;
+                                self.jumpTemp = false;
+                                self.jumpTimeStarted = 0;
+                                self.jumpTimeCurrent = 0;
+                                self.jump();
+                            }
                             if ( !self.state.acceleration ) {
                                 // since we know that this is the first click/keypress on bird, we can generate tubes here
                                 game.obstruction.generate();
                                 game.started = true;
                                 self.state.acceleration = 3;
                                 game.ground.speed += self.state.acceleration;
-                            } else {
-                                //  If he isn't already in the air, he can jump
-                                if ( self.jumpInAir == false ) {
-                                    // resetting jump temporaries variables
-                                    self.jumpTop = false;
-                                    self.jumpDown = false;
-                                    self.jumpTemp = false;
-                                    self.jumpTimeStarted = 0;
-                                    self.jumpTimeCurrent = 0;
-                                    self.jump();
-                                }
+                                game.increaseDifficultyByTime.originalGroundSpeed += self.state.acceleration; // Don't forget for the function increaseDifficultyByTime
+
                             }
                         } else {
                             // restart game
@@ -391,13 +382,12 @@
                     } else {
                         return;
                     }
+                }
+                if ( this.destinationFrame.dy < this.runDestinationFrame.dy ) {
+                    self.jump();
                 } else {
-                    if ( this.destinationFrame.dy < this.runDestinationFrame.dy ) {
-                        self.jump();
-                    } else {
-                        self.jumpInAir = false;
-                        self.run();
-                    }
+                    self.jumpInAir = false;
+                    self.run();
                 }
 
                 // don't update shinobi if game isn't started
@@ -417,18 +407,17 @@
 
                 // check Obstacles hitzones collisions
                 game.Obstacles.forEach( function( oObstacles ) {
-                    var i = 0,
-                        oPosition = self.position,
+                    var oPosition = self.position,
                         oObstruction = oObstacles.frames.smallWall,
                         bIsEnnemy = false;
 
-                    if ( oObstruction == undefined ) {
+                    if ( oObstruction === undefined ) {
                         oObstruction = oObstacles.frames.ennemies;
                         bIsEnnemy = true;
                     } // Update path for ennemies
 
                     if ( oPosition.left < oObstruction.dx + oObstruction.dw && oPosition.left + ( oPosition.right - oPosition.left ) > oObstruction.dx && oPosition.top < oObstruction.dy + oObstruction.dh && ( oPosition.bottom - oPosition.top ) + oPosition.top > oObstruction.dy ) {
-                        if ( bIsEnnemy == true ) {
+                        if ( bIsEnnemy === true ) {
                             game.lives--;
                             game.Obstacles.pop();
                         } else {
@@ -441,8 +430,7 @@
 
                 // check Projectiles hitzones collisions
                 game.Projectiles.forEach( function( oProjectiles ) {
-                    var i = 0,
-                        oPosition = self.position,
+                    var oPosition = self.position,
                         oObstruction = oProjectiles.frames.kunai;
 
                     if ( oPosition.left < oObstruction.dx + oObstruction.dw && oPosition.left + ( oPosition.right - oPosition.left ) > oObstruction.dx && oPosition.top < oObstruction.dy + oObstruction.dh && ( oPosition.bottom - oPosition.top ) + oPosition.top > oObstruction.dy ) {
@@ -453,19 +441,15 @@
                     }
                 } );
 
-                if ( game.lives == 0 ) {
+                if ( game.lives === 0 ) {
+                    game.displayLives.draw(); // to clear the last head emplacement on the screen
                     game.over();
                 }
 
-                // update score
-                if ( self.state.isInDangerZone ) {
-                    if ( self.score.current === self.score.previous ) {
-                        self.score.current++;
-                    }
-                } else {
-                    self.score.previous = self.score.current;
-                }
-                self.state.isInDangerZone = false;
+                // draw score
+                oApp.context.font = "bold 20px 'Pixel-Art', 'Arial'";
+                oApp.context.textAlign = "right";
+                oApp.context.fillText( this.score.current, game.app.width - 10, 30 );
             }
         };
 
@@ -478,13 +462,14 @@
                 this.ObstacleGap = 350; // Minimal value between Obstacles
                 this.ObstacleOffsetHasard = 500; // More this value is big, more the gap between Obstacles can be higher.
                 this.EnnemiesPositions = []; // To reccord ennemies positions in the table "Obstacles". When unshift new object in the table "Obstacles", unshift 1 in "EnnemiesPositions" if it is an ennemie or 0 if not. D'ont forget to pop "EnnemiesPositions" when pop "Obstacles"
+                this.OffsetOffEnnemiesNumber = 1; // To decrese the number of ennemies, put a smaller cypher, or a bigger to have more ennemies
             },
             "generateNextObstacle": function() {
                 this.newObstacleWidth = this.lastGeneratedObstacleWidth + Math.floor( Math.random() * this.ObstacleOffsetHasard ) + this.ObstacleGap;
             },
             "generate": function() {
                 this.generateNextObstacle();
-                if ( Math.floor( Math.random() * 10 ) < 3 ) {
+                if ( Math.floor( Math.random() * 10 ) < this.OffsetOffEnnemiesNumber ) {
                     game.Obstacles.unshift( new Ennemie() );
                     this.EnnemiesPositions.unshift( 1 );
                     game.Projectiles.unshift( new EnnemyKunai() );
@@ -500,15 +485,14 @@
                 this.lastGeneratedObstacleWidth = 0;
 
                 for ( ; i < game.Obstacles.length; i++ ) {
-                    if ( this.EnnemiesPositions[ i ] == 1 ) {
+                    if ( this.EnnemiesPositions[ i ] === 1 ) {
                         if ( game.Obstacles[ i ].frames.ennemies.dx > this.lastGeneratedObstacleWidth ) {
                             this.lastGeneratedObstacleWidth = game.Obstacles[ i ].frames.ennemies.dx;
                         }
+                    }
+                    if ( this.EnnemiesPositions[ i ] === 0 && game.Obstacles[ i ].frames.smallWall.dx > this.lastGeneratedObstacleWidth ) {
+                        this.lastGeneratedObstacleWidth = game.Obstacles[ i ].frames.smallWall.dx;
 
-                    } else {
-                        if ( game.Obstacles[ i ].frames.smallWall.dx > this.lastGeneratedObstacleWidth ) {
-                            this.lastGeneratedObstacleWidth = game.Obstacles[ i ].frames.smallWall.dx;
-                        }
                     }
                 } // Allways record the position of the latest created Obstacle
 
@@ -614,81 +598,23 @@
         this.gameOverScreen = {
             "frames": {
                 "title": {
-                    "sx": 784,
-                    "sy": 114,
-                    "sw": 204,
-                    "sh": 56,
-                    "dx": ( game.app.width - 204 ) / 2,
-                    "dy": 75,
-                    "dw": 204,
-                    "dh": 56
-                },
-                "modal": {
-                    "sx": 0,
-                    "sy": 516,
-                    "sw": 238,
-                    "sh": 126,
-                    "dx": ( game.app.width - 238 ) / 2,
-                    "dy": 150,
-                    "dw": 238,
-                    "dh": 126
-                },
-                "cyphers": {
-                    "sx": 276,
-                    "sw": 12,
-                    "sh": 14,
-                    "sy": {
-                        "0": 646,
-                        "1": 664,
-                        "2": 698,
-                        "3": 716,
-                        "4": 750,
-                        "5": 768,
-                        "6": 802,
-                        "7": 820,
-                        "8": 854,
-                        "9": 872
-                    }
-                },
-                "medal": {
-                    "sx": 242,
-                    "sy": 564,
-                    "sw": 44,
-                    "sh": 44,
-                    "dx": 0,
-                    "dy": 0,
-                    "dw": 44,
-                    "dh": 44
+                    "sx": 334,
+                    "sy": 656,
+                    "sw": 319,
+                    "sh": 48,
+                    "dx": ( game.app.width - 319 ) / 2,
+                    "dy": ( game.app.height - 48 ) / 3,
+                    "dw": 319,
+                    "dh": 48
                 }
             },
             "draw": function() {
                 game._drawSpriteFromFrame( this.frames.title );
-                game._drawSpriteFromFrame( this.frames.modal );
             },
-            "drawScore": function( iScore, bBestScore ) {
-                var aScoreParts = ( iScore + "" ).split( "" ),
-                    self = this;
-
-                // drawing score
-                aScoreParts.reverse().forEach( function( sScorePart, iIndex ) {
-                    var iDxPosition = game.app.width / 2 + 91 - self.frames.cyphers.sw;
-
-                    game._drawSpriteFromFrame( {
-                        "sx": self.frames.cyphers.sx,
-                        "sy": self.frames.cyphers.sy[ sScorePart ],
-                        "sw": self.frames.cyphers.sw,
-                        "sh": self.frames.cyphers.sh,
-                        "dx": iDxPosition - ( iIndex * ( self.frames.cyphers.sw + 2 ) ),
-                        "dy": self.frames.modal.dy + ( bBestScore ? 73 : 39 ),
-                        "dw": self.frames.cyphers.sw,
-                        "dh": self.frames.cyphers.sh
-                    } );
-                } );
-            },
-            "drawMedal": function() {
-                this.frames.medal.dx = game.app.width / 2 - 87;
-                this.frames.medal.dy = this.frames.modal.dy + 44;
-                game._drawSpriteFromFrame( this.frames.medal );
+            "drawScore": function( iScore ) {
+                oApp.context.font = "bold 30px 'Pixel-Art', 'Arial'";
+                oApp.context.textAlign = "center";
+                oApp.context.fillText( "Votre Score : " + iScore, game.app.width / 2, ( game.app.height ) / 2 );
             }
         };
 
@@ -714,6 +640,26 @@
             );
         };
 
+        this.increaseDifficultyByTime = {
+            "init": function() {
+                this.scorePrevious = 0;
+                this.difficultyIncrementor = 0;
+                this.originalOffsetOffEnnemiesNumber = game.obstruction.OffsetOffEnnemiesNumber;
+                this.originalGroundSpeed = game.ground.speed;
+
+                this.difficultyOffset = 1;  // increase to increase game difficulty
+            },
+            "update": function() {
+                this.scorePrevious = game.shinobi.score.current - ( this.difficultyIncrementor * ( 100 * this.difficultyOffset ) );
+                if ( this.scorePrevious >= ( 100 * this.difficultyOffset ) ) {
+                    this.difficultyIncrementor++;
+                    this.scorePrevious = 0;
+                }
+                game.obstruction.OffsetOffEnnemiesNumber = this.originalOffsetOffEnnemiesNumber + this.difficultyIncrementor;
+                game.ground.speed = ( this.originalGroundSpeed + Math.floor( this.difficultyIncrementor / 2 ) );
+            }
+        };
+
         // Setup Animation loop
         this.animate = function() {
             this.time.current = Date.now();
@@ -731,7 +677,7 @@
             this.Obstacles.forEach( function( oObstacles ) {
                 oObstacles.update();
             } );
-            if ( game.started == true) {
+            if ( game.started === true ) {
                 this.obstruction.update();
             }
             // draw & animate: Projectiles
@@ -741,9 +687,11 @@
             // draw & animate: shinobi
             if ( this.time.current - this.time.start > 50 ) {
                 this.time.start = Date.now();
-                ( ++this.shinobi.animation.step < this.shinobi.animation.maxSteps ) || ( this.shinobi.animation.step = 0 );
+                ( ++this.shinobi.animation.step < this.shinobi.animation.maxSteps ) || ( this.shinobi.animation.step = 0 ) || ( ++this.shinobi.score.current );
             }
             this.shinobi.update();
+            // increase difficulty by time
+            this.increaseDifficultyByTime.update();
             // draw start screen if needed
             if ( !game.started ) {
                 this.starting.draw();
@@ -752,40 +700,14 @@
 
         // Game over
         this.over = function() {
-            // var iCurrentScore = this.shinobi.score.current;
+            var iCurrentScore = this.shinobi.score.current;
 
             window.cancelAnimationFrame( this.animationRequestID );
 
             this.ended = true;
 
-            // reqwest( {
-            //     "url": "http://hepl01.cblue.be/~user0/flapi/",
-            //     "method": "POST",
-            //     "type": "json",
-            //     "data": {
-            //         "a": "store",
-            //         "r": "score",
-            //         "score": iCurrentScore
-            //     },
-            //     "error": function( oError ) {
-            //         console.error( oError );
-            //     },
-            //     "success": function( aScores ) {
-            //         var iBestScore = +aScores[ 0 ].score;
-            //
-            //         if ( isNaN( iBestScore ) ) {
-            //             return;
-            //         }
-            //
-            //         game.gameOverScreen.draw();
-            //         game.gameOverScreen.drawScore( iCurrentScore );
-            //         game.gameOverScreen.drawScore( iBestScore, true );
-            //
-            //         if ( iBestScore === iCurrentScore ) {
-            //             game.gameOverScreen.drawMedal();
-            //         }
-            //     }
-            // } );
+            game.gameOverScreen.draw();
+            game.gameOverScreen.drawScore( iCurrentScore );
         };
 
         // Init game
@@ -797,20 +719,21 @@
                 this.eventsSetted = true;
             }
             // reset some variables
-            game.lives = 3;
-            game.ground.speed = 3;
-            game.background.speed = game.ground.speed / 4;
-            game.started = false;
-            game.ended = false;
-            game.Obstacles = [];
-            game.Projectiles = [];
-            game.ground.init();
-            game.displayLives.init();
-            game.obstruction.init();
-            game.shinobi.init();
-            game.time.start = Date.now();
+            this.lives = 3;
+            this.ground.speed = 1;
+            this.background.speed = this.ground.speed / 4;
+            this.started = false;
+            this.ended = false;
+            this.Obstacles = [];
+            this.Projectiles = [];
+            this.ground.init();
+            this.displayLives.init();
+            this.obstruction.init();
+            this.shinobi.init();
+            this.increaseDifficultyByTime.init();
+            this.time.start = Date.now();
             // launch animation
-            game.animate();
+            this.animate();
         };
 
         // Load spritesheet
