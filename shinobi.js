@@ -9,8 +9,9 @@
     Shinobi = function( oApp ) {
 
         var game = this,
-            SmallWalls,
-            iLives,
+            SmallWall,
+            Ennemie,
+            EnnemyKunai,
             aGroundDx = [],
             aHeadDx = [];
 
@@ -78,17 +79,30 @@
         };
 
         // Ground
+        // this.ground = {
+        //     "frame": {
+        //         "sx": 0,
+        //         "sy": 415,
+        //         "sw": 185,
+        //         "sh": 320,
+        //         "dx": 0,
+        //         "dy": game.app.height - 320,
+        //         "dw": 185,
+        //         "dh": 320
+        //     },
+                    // initial ground
+
         this.ground = {
             "frame": {
                 "sx": 0,
-                "sy": 415,
+                "sy": 612,
                 "sw": 185,
-                "sh": 320,
+                "sh": 123,
                 "dx": 0,
-                "dy": game.app.height - 320,
+                "dy": game.app.height - 123,
                 "dw": 185,
-                "dh": 320
-            },
+                "dh": 123
+            },  // Temporary ground without sub part to avoid contrast matter with Obstacles Obstruction.
             "speed": 0,
             "init": function() {
                 while ( this.frame.dx <= ( this.frame.sw * 4 ) ) {
@@ -135,7 +149,7 @@
                 }
             },
             "init": function() {
-                while ( this.frames.head.dx <= 25 * iLives ) {
+                while ( this.frames.head.dx <= 25 * game.lives ) {
                     aHeadDx.push( this.frames.head.dx );
                     this.frames.head.dx += 25;
                 }
@@ -143,7 +157,7 @@
             "draw": function() {
                 game._drawSpriteFromFrame( this.frames.background );
                 // draw heads
-                for ( var i = 0; i < iLives; i++ ) {
+                for ( var i = 0; i < game.lives; i++ ) {
                     game._drawSpriteFromFrame( this.frames.head, aHeadDx[ i ] );
                 }
             }
@@ -290,7 +304,7 @@
             "jump": function() {
                 var iStep = this.animation.step,
                     oFrom = {},
-                    iMaxJump = this.runDestinationFrame.dy - ( game.Walls[ 0 ].frame.small.dh + this.jumpDestinationFrame.dh );
+                    iMaxJump = this.runDestinationFrame.dy - ( 97/* SmallWall sh */ + this.jumpDestinationFrame.dh );
 
                 this.jumpInAir = true;
 
@@ -354,7 +368,7 @@
                         if ( !game.ended ) {
                             if ( !self.state.acceleration ) {
                                 // since we know that this is the first click/keypress on bird, we can generate tubes here
-                                SmallWalls.generate();
+                                game.obstruction.generate();
                                 game.started = true;
                                 self.state.acceleration = 3;
                                 game.ground.speed += self.state.acceleration;
@@ -401,17 +415,47 @@
                 self.position.right = self.destinationFrame.dx + self.destinationFrame.dw * 2;
                 // right: 238
 
-                // check Walls hitzones collisions
-                game.Walls.forEach( function( oWalls ) {
-                    var oPosition = self.position,
-                        oSmallWalls = oWalls.frame.small;
+                // check Obstacles hitzones collisions
+                game.Obstacles.forEach( function( oObstacles ) {
+                    var i = 0,
+                        oPosition = self.position,
+                        oObstruction = oObstacles.frames.smallWall,
+                        bIsEnnemy = false;
 
-                    if ( oPosition.left < oSmallWalls.dx + oSmallWalls.dw && oPosition.left + ( oPosition.right - oPosition.left ) > oSmallWalls.dx && oPosition.top < oSmallWalls.dy + oSmallWalls.dh && ( oPosition.bottom - oPosition.top ) + oPosition.top > oSmallWalls.dy ) {
-                        game.over();
+                    if ( oObstruction == undefined ) {
+                        oObstruction = oObstacles.frames.ennemies;
+                        bIsEnnemy = true;
+                    } // Update path for ennemies
+
+                    if ( oPosition.left < oObstruction.dx + oObstruction.dw && oPosition.left + ( oPosition.right - oPosition.left ) > oObstruction.dx && oPosition.top < oObstruction.dy + oObstruction.dh && ( oPosition.bottom - oPosition.top ) + oPosition.top > oObstruction.dy ) {
+                        if ( bIsEnnemy == true ) {
+                            game.lives--;
+                            game.Obstacles.pop();
+                        } else {
+                            game.over();
+                        }
                     } else {
                         self.state.isInDangerZone = true;
                     }
                 } );
+
+                // check Projectiles hitzones collisions
+                game.Projectiles.forEach( function( oProjectiles ) {
+                    var i = 0,
+                        oPosition = self.position,
+                        oObstruction = oProjectiles.frames.kunai;
+
+                    if ( oPosition.left < oObstruction.dx + oObstruction.dw && oPosition.left + ( oPosition.right - oPosition.left ) > oObstruction.dx && oPosition.top < oObstruction.dy + oObstruction.dh && ( oPosition.bottom - oPosition.top ) + oPosition.top > oObstruction.dy ) {
+                        game.lives--;
+                        game.Projectiles.pop();
+                    } else {
+                        self.state.isInDangerZone = true;
+                    }
+                } );
+
+                if ( game.lives == 0 ) {
+                    game.over();
+                }
 
                 // update score
                 if ( self.state.isInDangerZone ) {
@@ -425,15 +469,94 @@
             }
         };
 
-        // Walls
-        SmallWalls = function( iDxPosition ) {
-            this.frame = {
-                "small": {
+
+        // Obstruction obstacles objects functions and varialbles
+        this.obstruction = {
+            "init": function() {
+                this.lastGeneratedObstacleWidth = game.app.width; // Init whith canvas width to be sure that the first Obstacle will be created far enought.
+                this.newObstacleWidth = 0;
+                this.ObstacleGap = 350; // Minimal value between Obstacles
+                this.ObstacleOffsetHasard = 500; // More this value is big, more the gap between Obstacles can be higher.
+                this.EnnemiesPositions = []; // To reccord ennemies positions in the table "Obstacles". When unshift new object in the table "Obstacles", unshift 1 in "EnnemiesPositions" if it is an ennemie or 0 if not. D'ont forget to pop "EnnemiesPositions" when pop "Obstacles"
+            },
+            "generateNextObstacle": function() {
+                this.newObstacleWidth = this.lastGeneratedObstacleWidth + Math.floor( Math.random() * this.ObstacleOffsetHasard ) + this.ObstacleGap;
+            },
+            "generate": function() {
+                this.generateNextObstacle();
+                if ( Math.floor( Math.random() * 10 ) < 3 ) {
+                    game.Obstacles.unshift( new Ennemie() );
+                    this.EnnemiesPositions.unshift( 1 );
+                    game.Projectiles.unshift( new EnnemyKunai() );
+                    // when we create a new obstacle, there is a chance to create an ennemie in place of a wall
+                } else {
+                    game.Obstacles.unshift( new SmallWall() );
+                    this.EnnemiesPositions.unshift( 0 );
+                }
+            },
+            "update": function() {
+                var i = 0;
+
+                this.lastGeneratedObstacleWidth = 0;
+
+                for ( ; i < game.Obstacles.length; i++ ) {
+                    if ( this.EnnemiesPositions[ i ] == 1 ) {
+                        if ( game.Obstacles[ i ].frames.ennemies.dx > this.lastGeneratedObstacleWidth ) {
+                            this.lastGeneratedObstacleWidth = game.Obstacles[ i ].frames.ennemies.dx;
+                        }
+
+                    } else {
+                        if ( game.Obstacles[ i ].frames.smallWall.dx > this.lastGeneratedObstacleWidth ) {
+                            this.lastGeneratedObstacleWidth = game.Obstacles[ i ].frames.smallWall.dx;
+                        }
+                    }
+                } // Allways record the position of the latest created Obstacle
+
+                if ( this.lastGeneratedObstacleWidth < game.app.width - this.ObstacleGap ) {
+                    this.generate();
+                } // If we don't have enought ostacles, we generate more Obstacles
+            }
+        };
+
+        // EnnemyKunai
+        EnnemyKunai = function() {
+            this.frames = {
+                "kunai": {
+                    "sx": 228,
+                    "sy": 1377,
+                    "sw": 20,
+                    "sh": 7,
+                    "dx": game.obstruction.newObstacleWidth,
+                    "dy": game.app.height - ( 112 + 62 - 25 ),
+                    "dw": 20,
+                    "dh": 7
+                }
+            };
+        };
+
+        EnnemyKunai.prototype.draw = function() {
+            game._drawSpriteFromFrame( this.frames.kunai );
+        };
+
+        EnnemyKunai.prototype.update = function() {
+            this.frames.kunai.dx -= ( game.ground.speed * 2 );
+
+            if ( this.frames.kunai.dx < ( this.frames.kunai.dw * -1 ) ) {
+                game.Projectiles.pop();
+            } // Check if a projectile get out of the Canvas and delete it
+
+            this.draw();
+        };
+
+        // SmallWalls
+        SmallWall = function() {
+            this.frames = {
+                "smallWall": {
                     "sx": 222,
                     "sy": 415,
                     "sw": 28,
                     "sh": 97,
-                    "dx": iDxPosition,
+                    "dx": game.obstruction.newObstacleWidth,
                     "dy": game.app.height - ( 112 + 97 ),
                     "dw": 28,
                     "dh": 97
@@ -441,51 +564,50 @@
             };
         };
 
-        SmallWalls.lastGeneratedWallWidth = game.app.width; // Init whith canvas width to be sure that the first wall will be created far enought.
-        SmallWalls.newWallWidth = 0;
-        SmallWalls.wallGap = 350; // Minimal value between walls
-        SmallWalls.wallOffsetHasard = 500; // More this value is big, more the gap between walls can be higher.
-
-        SmallWalls.prototype.draw = function() {
-            game._drawSpriteFromFrame( this.frame.small );
+        SmallWall.prototype.draw = function() {
+            game._drawSpriteFromFrame( this.frames.smallWall );
         };
 
-        SmallWalls.prototype.update = function() {
-            var i = 0,
-                iWallDxMax = 0,
-                iWallWidth;
+        SmallWall.prototype.update = function() {
+            this.frames.smallWall.dx -= game.ground.speed;
 
-            this.frame.small.dx -= game.ground.speed;
-
-            for ( ; i < game.Walls.length; i++ ) {
-                if ( game.Walls[ i ].frame.small.dx > iWallDxMax ) {
-                    iWallDxMax = game.Walls[ i ].frame.small.dx;
-                }
-            }
-            SmallWalls.lastGeneratedWallWidth = iWallDxMax; // Allways record the position of the latest created wall
-
-            if ( SmallWalls.lastGeneratedWallWidth < game.app.width - SmallWalls.wallGap ) {
-                SmallWalls.generate();
-            } // If we don't have enought ostacles, we generate more walls
-
-            if ( this.frame.small.dx < ( this.frame.small.dw * -1 ) ) {
-                this.frame.small.dx = SmallWalls.generateNextWall();
-            } // When the wall go out of the canvas, restart his position with a new one
+            if ( this.frames.smallWall.dx < ( this.frames.smallWall.dw * -1 ) ) {
+                game.Obstacles.pop();
+                game.obstruction.EnnemiesPositions.pop();
+            } // Check if an obstacle get out of the Canvas and delete it
 
             this.draw();
         };
 
-        SmallWalls.generateNextWall = function() {
-            var iNewValue = 0;
-
-            SmallWalls.newWallWidth = SmallWalls.lastGeneratedWallWidth + Math.floor( Math.random() * SmallWalls.wallOffsetHasard ) + SmallWalls.wallGap;
-            iNewValue = SmallWalls.newWallWidth;
-
-            return iNewValue;
+        // Ennemies
+        Ennemie = function() {
+            this.frames = {
+                "ennemies": {
+                    "sx": 0,
+                    "sy": 1220,
+                    "sw": 54,
+                    "sh": 63,
+                    "dx": game.obstruction.newObstacleWidth,
+                    "dy": game.app.height - ( 112 + 63 ),
+                    "dw": 54,
+                    "dh": 63
+                }
+            };
         };
 
-        SmallWalls.generate = function() {
-            game.Walls.push( new SmallWalls( SmallWalls.generateNextWall() ) );
+        Ennemie.prototype.draw = function() {
+            game._drawSpriteFromFrame( this.frames.ennemies );
+        };
+
+        Ennemie.prototype.update = function() {
+            this.frames.ennemies.dx -= game.ground.speed;
+
+            if ( this.frames.ennemies.dx < ( this.frames.ennemies.dw * -1 ) ) {
+                game.Obstacles.pop();
+                game.obstruction.EnnemiesPositions.pop();
+            } // Check if an obstacle get out of the Canvas and delete it
+
+            this.draw();
         };
 
         // Game Over Screen
@@ -605,9 +727,16 @@
             this.ground.update();
             // draw: displayLives
             this.displayLives.draw();
-            // draw & animate: Walls
-            this.Walls.forEach( function( oWalls ) {
-                oWalls.update();
+            // draw & animate: Obstacles
+            this.Obstacles.forEach( function( oObstacles ) {
+                oObstacles.update();
+            } );
+            if ( game.started == true) {
+                this.obstruction.update();
+            }
+            // draw & animate: Projectiles
+            this.Projectiles.forEach( function( oProjectiles ) {
+                oProjectiles.update();
             } );
             // draw & animate: shinobi
             if ( this.time.current - this.time.start > 50 ) {
@@ -668,14 +797,16 @@
                 this.eventsSetted = true;
             }
             // reset some variables
-            iLives = 3;
+            game.lives = 3;
             game.ground.speed = 3;
             game.background.speed = game.ground.speed / 4;
             game.started = false;
             game.ended = false;
-            game.Walls = [];
+            game.Obstacles = [];
+            game.Projectiles = [];
             game.ground.init();
             game.displayLives.init();
+            game.obstruction.init();
             game.shinobi.init();
             game.time.start = Date.now();
             // launch animation
