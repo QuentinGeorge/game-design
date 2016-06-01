@@ -58,11 +58,13 @@
 
         mVolume.onclick = function() {
             mVolume.blur();
+            mAudioPlayer.muted = false;
             fModifiVolumeIcon( mAudioPlayer, mMute );
         };
 
         mVolume.oninput = function() {
             mVolume.blur();
+            mAudioPlayer.muted = false;
             mAudioPlayer.volume = mVolume.value;
             fModifiVolumeIcon( mAudioPlayer, mMute );
         };
