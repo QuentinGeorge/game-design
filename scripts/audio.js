@@ -49,8 +49,10 @@
             mMute.blur();
             if ( mAudioPlayer.muted === true ) {
                 mAudioPlayer.muted = false;
+                fModifiVolumeIcon( mAudioPlayer, mMute );
             } else {
                 mAudioPlayer.muted = true;
+                mMute.style.backgroundImage = "url('./resources/img/soundsSvg/volume-mute.svg')";
             }
         };
 
