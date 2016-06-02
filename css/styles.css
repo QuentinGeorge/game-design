@@ -64,16 +64,15 @@ table {
 html {
   font: normal 16px/1.4 'Helvetica', 'Helvetica Neue', 'Arial', 'sans-serif';
   text-align: center;
-  background-color: #000000; }
-
-body {
+  background-color: #000000;
   background: url("../resources/img/background.jpg") center no-repeat;
   -o-background-size: cover;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
-  max-width: 1800px;
-  margin: 0 auto;
+  min-height: 100%; }
+
+body {
   padding: 1.5rem; }
 
 h1 {
@@ -179,10 +178,10 @@ canvas {
   border-left: 1px solid rgba(0, 50, 100, 0.4); }
 
 .volume {
-  -webkit-transition: width 1s ease-in-out;
-  -moz-transition: width 1s ease-in-out;
-  -o-transition: width 1s ease-in-out;
-  transition: width 1s ease-in-out;
+  -webkit-transition: width .5s ease-in-out;
+  -moz-transition: width .5s ease-in-out;
+  -o-transition: width .5s ease-in-out;
+  transition: width .5s ease-in-out;
   width: 0px;
   display: inline-block;
   white-space: nowrap;
@@ -191,10 +190,10 @@ canvas {
   height: 100%; }
 
 .sound-controls:hover .volume {
-  -webkit-transition: width 1s ease-in-out;
-  -moz-transition: width 1s ease-in-out;
-  -o-transition: width 1s ease-in-out;
-  transition: width 1s ease-in-out;
+  -webkit-transition: width .5s ease-in-out;
+  -moz-transition: width .5s ease-in-out;
+  -o-transition: width .5s ease-in-out;
+  transition: width .5s ease-in-out;
   width: 100px;
   margin-right: 10px;
   overflow: visible;

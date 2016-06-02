@@ -12,16 +12,15 @@ html {
     font: normal 16px/1.4 'Helvetica', 'Helvetica Neue', 'Arial', 'sans-serif';
     text-align: center;
     background-color: $cMainBackground;
-}
-
-body {
     background: url('#{ $imgPath }background.jpg') center no-repeat;
     -o-background-size: cover;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
-    max-width: 1800px;
-    margin: 0 auto;
+    min-height: 100%;
+}
+
+body {
     padding: 1.5rem;
 }
 
