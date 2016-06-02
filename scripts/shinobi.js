@@ -44,7 +44,6 @@
                     "dh": 55
                 }
             },
-            "canStartAudio": true,
             "draw": function() {
                 game._drawSpriteFromFrame( this.frames.ready );
                 game._drawSpriteFromFrame( this.frames.button );
@@ -374,11 +373,6 @@
                                 self.state.acceleration = 3;
                                 game.ground.speed += self.state.acceleration;
                                 game.increaseDifficultyByTime.originalGroundSpeed += self.state.acceleration; // Don't forget for the function increaseDifficultyByTime
-                                if ( game.starting.canStartAudio === true ) {
-                                    document.getElementById( "player" ).play();
-                                    game.starting.canStartAudio = false;
-                                    document.getElementById( "control-play-pause" ).style.backgroundImage = "url('./resources/img/soundsSvg/pause.svg')";
-                                } // Start playing music only on the first launching game after page loaded
                             }
                         } else {
                             // restart game

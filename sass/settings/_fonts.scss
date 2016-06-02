@@ -1,0 +1,19 @@
+// Shojumaru
+@font-face {
+    font-family: 'Shojumaru';
+    src: url('#{ $fontPath }shojumaru/Shojumaru-Regular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+// Sound Glyphes
+@font-face {
+    font-family: 'sound-glyphes';
+    src: url('#{ $fontPath }sound-glyphes.eot?f9i9u1');
+    src: url('#{ $fontPath }sound-glyphes.eot?f9i9u1#iefix') format('embedded-opentype'),
+         url('#{ $fontPath }sound-glyphes.ttf?f9i9u1') format('truetype'),
+         url('#{ $fontPath }sound-glyphes.woff?f9i9u1') format('woff'),
+         url('#{ $fontPath }sound-glyphes.svg?f9i9u1#sound-glyphes') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}

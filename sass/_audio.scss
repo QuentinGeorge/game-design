@@ -1,0 +1,106 @@
+// Audio bar styles
+
+// Use super form rest only for the inputs elements of audio
+.play-pause, .mute, .volume {
+    margin:0;
+    border:0;
+    padding:0;
+    display:inline-block;
+    vertical-align:middle;
+    white-space:normal;
+    background:none;
+    line-height:1;
+
+    /* Browsers have different default form fonts */
+    font-size:13px;
+    font-family:Arial;
+
+    /* Fix IE7 display bug */
+    overflow:visible;
+    width:auto;
+
+    /* Box Sizing Reset */
+    -webkit-box-sizing:content-box;
+    -moz-box-sizing:content-box;
+    box-sizing:content-box;
+}
+
+/* Remove the stupid outer glow in Webkit */
+.player-controls input:focus
+{
+    outline:0;
+}
+// End of reset
+
+.player-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    background: $cSoundsControlsBackground;
+    border-radius: 10px 10px 0 0;
+    border-top: 1px solid $cCanvasBorder;
+    border-right: 1px solid $cCanvasBorder;
+    border-left: 1px solid $cCanvasBorder;
+    -moz-box-shadow: 0 0 20px 0 $cCanvasShadow;
+    -webkit-box-shadow: 0 0 20px 0 $cCanvasShadow;
+    box-shadow: 0 0 20px 0 $cCanvasShadow;
+}
+
+.play-pause, .mute {
+    width: 30px;
+    height: 30px;
+}
+
+.play-pause {
+    display: inline-block;
+    background-image: url('../resources/img/soundsSvg/play.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60% 60%;
+    padding: 5px 10px;
+}
+
+.mute {
+    background-image: url('../resources/img/soundsSvg/volume-medium.svg');
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 60% 60%;
+    padding: 5px 0 5px 10px;
+    margin-top: -5px;
+}
+
+.sound-controls {
+    display: inline-block;
+    width: auto;
+    margin-left: -5px;
+    margin-right: 8px;
+    height: 30px;
+    vertical-align: middle;
+    border-left: 1px solid $cCanvasBorder;
+}
+
+.volume {
+    -webkit-transition: width 1s ease-in-out;
+    -moz-transition: width 1s ease-in-out;
+    -o-transition: width 1s ease-in-out;
+    transition: width 1s ease-in-out;
+    width: 0px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-top: -5px;
+    // padding: 15px 0;
+    height: 100%;
+}
+
+.sound-controls:hover .volume {
+    -webkit-transition: width 1s ease-in-out;
+    -moz-transition: width 1s ease-in-out;
+    -o-transition: width 1s ease-in-out;
+    transition: width 1s ease-in-out;
+    width: 100px;
+    margin-right: 10px;
+    overflow: visible;
+    height: 100%;
+}

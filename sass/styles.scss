@@ -1,0 +1,48 @@
+// Generic CSS
+@import "generic/meyer-reset";
+
+// Settings Variables
+@import "settings/paths";
+@import "settings/fonts";
+@import "settings/colors";
+
+/* Styles */
+
+html {
+    font: normal 16px/1.4 'Helvetica', 'Helvetica Neue', 'Arial', 'sans-serif';
+    text-align: center;
+    background-color: $cMainBackground;
+}
+
+body {
+    background: url('#{ $imgPath }background.jpg') center no-repeat;
+    -o-background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+h1 {
+    font-family: 'Shojumaru', 'Arial', 'sans-serif';
+    font-size: 2rem;
+    line-height: 3rem;
+    letter-spacing: 2px;
+    margin-bottom: 0;
+    text-shadow: 0 5px 15px $cCanvasShadow;
+    color: $cMainTitle;
+    text-transform: uppercase;
+}
+
+h1 .kanji {
+    font-family: 'Adobe Heiti Std', 'Arial', 'sans-serif';
+    display: block;
+}
+
+@import "canvas";
+
+@import "audio";
+
+@import "range";
