@@ -18,20 +18,16 @@ html {
     -moz-background-size: cover;
     background-size: cover;
     min-height: 100%;
-    display: flex;
 }
 
 body {
-    padding: 1.5rem;
-    margin: auto;
+    margin: 8vh auto;
 }
 
 h1 {
     font-family: 'Shojumaru', 'Arial', 'sans-serif';
-    font-size: 2rem;
-    line-height: 3rem;
+    font-size: 2.5rem;
     letter-spacing: 2px;
-    margin-bottom: 0;
     text-shadow: 0 5px 15px $cCanvasShadow;
     color: $cMainTitle;
     text-transform: uppercase;
@@ -40,10 +36,21 @@ h1 {
 h1 .kanji {
     font-family: 'Adobe Heiti Std', 'Arial', 'sans-serif';
     display: block;
+    margin-bottom: 1rem;
 }
 
-@import "canvas";
+.h1-container {
+    display: block;
+    width: 48rem;
+    max-width: 100%;
+    margin: 0 auto 4vh auto;
+    position: relative;
+}
 
-@import "audio";
+@import "./parts/canvas";
 
-@import "range";
+@import "./parts/audio";
+
+@import "./parts/range";
+
+@import "./parts/imageAnimation";

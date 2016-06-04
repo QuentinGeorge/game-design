@@ -7,7 +7,7 @@
         mVolume = document.getElementById( "control-volume" ),
         fModifiVolumeIcon,
         fStartAudioOnFirstGameStart,
-        bFirstGameStarted = false;
+        bFirstAudioStarted = false;
 
     fModifiVolumeIcon = function( AudioPlayer, ButtonMute ) {
         if ( AudioPlayer.volume === 0 || AudioPlayer.muted === true ) {
@@ -29,9 +29,9 @@
     };
 
     fStartAudioOnFirstGameStart = function( oEvent ) {
-        if ( ( oEvent.type === "mousedown" || ( oEvent.type === "keydown" && oEvent.keyCode === 32 ) ) && bFirstGameStarted === false ) {
+        if ( ( oEvent.type === "mousedown" || ( oEvent.type === "keydown" && oEvent.keyCode === 32 ) ) && bFirstAudioStarted === false ) {
             mAudioPlayer.play();
-            bFirstGameStarted = true;
+            bFirstAudioStarted = true;
             mPlayPause.style.backgroundImage = "url('./resources/img/soundsSvg/pause.svg')";
         }
     };
@@ -48,6 +48,7 @@
         mPlayPause.blur();
         if ( mAudioPlayer.paused === true ) {
             mAudioPlayer.play();
+            bFirstAudioStarted = true;
             mPlayPause.style.backgroundImage = "url('./resources/img/soundsSvg/pause.svg')";
         } else {
             mAudioPlayer.pause();

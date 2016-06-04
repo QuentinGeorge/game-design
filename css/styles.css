@@ -70,36 +70,39 @@ html {
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
-  min-height: 100%;
-  display: flex; }
+  min-height: 100%; }
 
 body {
-  padding: 1.5rem;
-  margin: auto; }
+  margin: 8vh auto; }
 
 h1 {
   font-family: 'Shojumaru', 'Arial', 'sans-serif';
-  font-size: 2rem;
-  line-height: 3rem;
+  font-size: 2.5rem;
   letter-spacing: 2px;
-  margin-bottom: 0;
   text-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
   color: #FF8E50;
   text-transform: uppercase; }
 
 h1 .kanji {
   font-family: 'Adobe Heiti Std', 'Arial', 'sans-serif';
-  display: block; }
+  display: block;
+  margin-bottom: 1rem; }
+
+.h1-container {
+  display: block;
+  width: 48rem;
+  max-width: 100%;
+  margin: 0 auto 4vh auto;
+  position: relative; }
 
 .container {
-  display: inline-block;
   width: 716px;
   height: 550px;
+  margin: 0 auto;
   position: relative; }
 
 canvas {
   display: block;
-  margin: 0 auto;
   border: 1px solid rgba(0, 50, 100, 0.4);
   -moz-box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
   -webkit-box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
@@ -284,5 +287,61 @@ input[type=range]:focus::-ms-fill-lower {
 
 input[type=range]:focus::-ms-fill-upper {
   background: #E3DDD8; }
+
+.h1-container img {
+  position: absolute; }
+
+.h1-container .ninja {
+  width: 5rem;
+  top: -1rem;
+  right: -0.4rem;
+  opacity: 1;
+  -webkit-transition: opacity .5s ease-in-out;
+  -moz-transition: opacity .5s ease-in-out;
+  -o-transition: opacity .5s ease-in-out;
+  transition: opacity .5s ease-in-out; }
+
+.h1-container:hover .ninja {
+  opacity: 0;
+  -webkit-transition: opacity .5s ease-in-out;
+  -moz-transition: opacity .5s ease-in-out;
+  -o-transition: opacity .5s ease-in-out;
+  transition: opacity .5s ease-in-out; }
+
+.h1-container .shadows {
+  width: 10rem;
+  top: -6.5rem;
+  right: -2.5rem;
+  opacity: 0;
+  -moz-animation-duration: 2s;
+  -webkit-animation-duration: 2s;
+  animation-duration: 2s;
+  -moz-animation-name: appear;
+  -webkit-animation-name: appear;
+  animation-name: appear; }
+
+.h1-container:hover .shadows {
+  -moz-animation-duration: 2s;
+  -webkit-animation-duration: 2s;
+  animation-duration: 2s;
+  -moz-animation-name: disappear;
+  -webkit-animation-name: disappear;
+  animation-name: disappear; }
+
+@keyframes appear {
+  0% {
+    opacity: 0; }
+  30% {
+    opacity: 0.8; }
+  100% {
+    opacity: 0; } }
+
+@keyframes disappear {
+  0% {
+    opacity: 0; }
+  30% {
+    opacity: 0.8; }
+  100% {
+    opacity: 0; } }
 
 /*# sourceMappingURL=styles.css.map */

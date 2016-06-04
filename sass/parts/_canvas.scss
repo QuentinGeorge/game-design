@@ -1,15 +1,14 @@
 // Canvas Styles
 
 .container {
-    display: inline-block;
     width: 716px;
     height: 550px;
+    margin: 0 auto;
     position: relative;
 }
 
 canvas {
     display: block;
-    margin: 0 auto;
     border: 1px solid $cCanvasBorder;
     -moz-box-shadow: 0 0 20px 0 $cCanvasShadow;
     -webkit-box-shadow: 0 0 20px 0 $cCanvasShadow;
