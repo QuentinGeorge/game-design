@@ -69,9 +69,12 @@ var sSrc = "src/",
         in: sSrc + "scripts/**/*.js",
         out: sDest + "scripts/",
         uglifyOpts: {
-            mangle: {
-                toplevel: true // Minify & obfuscate
-            }
+            
+// disable obfuscation for issue with .play() .pause() methods in audio.js
+
+            // mangle: {
+            //     toplevel: true // Minify & obfuscate
+            // }
         },
         plumberOpts: {
             errorHandler: gNotify.onError( fPlumberError( sTaskError = "Scripts" ) )
