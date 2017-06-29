@@ -742,7 +742,7 @@
         // Load spritesheet
         this.spriteSheet = new Image();
         this.spriteSheet.addEventListener( "load", this.init.bind( this ) );
-        this.spriteSheet.src = "./resources/sprite.png";
+        this.spriteSheet.src = "./assets/sprite.png";
     };
 
     window.Shinobi = Shinobi;

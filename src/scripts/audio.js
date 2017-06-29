@@ -11,19 +11,19 @@
 
     fModifiVolumeIcon = function( AudioPlayer, ButtonMute ) {
         if ( AudioPlayer.volume === 0 || AudioPlayer.muted === true ) {
-            ButtonMute.style.backgroundImage = "url('./resources/img/soundsSvg/volume-mute.svg')";
+            ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-mute.svg')";
             return;
         }
         if ( AudioPlayer.volume > 0 && AudioPlayer.volume <= 0.33 ) {
-            ButtonMute.style.backgroundImage = "url('./resources/img/soundsSvg/volume-low.svg')";
+            ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-low.svg')";
             return;
         }
         if ( AudioPlayer.volume > 0.33 && AudioPlayer.volume <= 0.66 ) {
-            ButtonMute.style.backgroundImage = "url('./resources/img/soundsSvg/volume-medium.svg')";
+            ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-medium.svg')";
             return;
         }
         if ( AudioPlayer.volume > 0.66 ) {
-            ButtonMute.style.backgroundImage = "url('./resources/img/soundsSvg/volume-high.svg')";
+            ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-high.svg')";
             return;
         }
     };
@@ -32,7 +32,7 @@
         if ( ( oEvent.type === "mousedown" || ( oEvent.type === "keydown" && oEvent.keyCode === 32 ) ) && bFirstAudioStarted === false ) {
             mAudioPlayer.play();
             bFirstAudioStarted = true;
-            mPlayPause.style.backgroundImage = "url('./resources/img/soundsSvg/pause.svg')";
+            mPlayPause.style.backgroundImage = "url('./assets/img/soundsSvg/pause.svg')";
         }
     };
 
@@ -49,10 +49,10 @@
         if ( mAudioPlayer.paused === true ) {
             mAudioPlayer.play();
             bFirstAudioStarted = true;
-            mPlayPause.style.backgroundImage = "url('./resources/img/soundsSvg/pause.svg')";
+            mPlayPause.style.backgroundImage = "url('./assets/img/soundsSvg/pause.svg')";
         } else {
             mAudioPlayer.pause();
-            mPlayPause.style.backgroundImage = "url('./resources/img/soundsSvg/play.svg')";
+            mPlayPause.style.backgroundImage = "url('./assets/img/soundsSvg/play.svg')";
         }
     };
 
