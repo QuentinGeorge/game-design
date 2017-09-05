@@ -6,31 +6,49 @@
 **/
 
 let mAudioPlayer = document.getElementById( "player" ),
-    mPlayPause = document.getElementById( "control-play-pause" ),
-    mMute = document.getElementById( "control-mute" ),
     mVolume = document.getElementById( "control-volume" ),
+    mPlayPause = document.querySelector( ".pause-play" ),
+    mMute = document.querySelector( ".volume__container" ),
+    oIconPlay = document.querySelector( ".pause-play__icon--play" ),
+    oIconPause = document.querySelector( ".pause-play__icon--pause" ),
+    oIconVolumeMute = document.querySelector( ".volume__icon--mute" ),
+    oIconVolumeLow = document.querySelector( ".volume__icon--low" ),
+    oIconVolumeMedium = document.querySelector( ".volume__icon--medium" ),
+    oIconVolumeHigh = document.querySelector( ".volume__icon--high" ),
     fModifiVolumeIcon,
     fStartAudioOnFirstGameStart,
     bFirstAudioStarted = false;
 
 fModifiVolumeIcon = function( AudioPlayer, ButtonMute ) {
     if ( AudioPlayer.volume === 0 || AudioPlayer.muted === true ) {
-        ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-mute.svg')";
+        oIconVolumeMute.style.opacity = 1;
+        oIconVolumeLow.style.opacity = 0;
+        oIconVolumeMedium.style.opacity = 0;
+        oIconVolumeHigh.style.opacity = 0;
 
         return;
     }
     if ( AudioPlayer.volume > 0 && AudioPlayer.volume <= 0.33 ) {
-        ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-low.svg')";
+        oIconVolumeMute.style.opacity = 0;
+        oIconVolumeLow.style.opacity = 1;
+        oIconVolumeMedium.style.opacity = 0;
+        oIconVolumeHigh.style.opacity = 0;
 
         return;
     }
     if ( AudioPlayer.volume > 0.33 && AudioPlayer.volume <= 0.66 ) {
-        ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-medium.svg')";
+        oIconVolumeMute.style.opacity = 0;
+        oIconVolumeLow.style.opacity = 1;
+        oIconVolumeMedium.style.opacity = 1;
+        oIconVolumeHigh.style.opacity = 0;
 
         return;
     }
     if ( AudioPlayer.volume > 0.66 ) {
-        ButtonMute.style.backgroundImage = "url('./assets/img/soundsSvg/volume-high.svg')";
+        oIconVolumeMute.style.opacity = 0;
+        oIconVolumeLow.style.opacity = 1;
+        oIconVolumeMedium.style.opacity = 1;
+        oIconVolumeHigh.style.opacity = 1;
 
         return;
     }
@@ -40,7 +58,8 @@ fStartAudioOnFirstGameStart = function( oEvent ) {
     if ( ( oEvent.type === "mousedown" || ( oEvent.type === "keydown" && oEvent.keyCode === 32 ) ) && bFirstAudioStarted === false ) {
         mAudioPlayer.play();
         bFirstAudioStarted = true;
-        mPlayPause.style.backgroundImage = "url('./assets/img/soundsSvg/pause.svg')";
+        oIconPlay.style.opacity = 0;
+        oIconPause.style.opacity = 1;
     }
 };
 
@@ -57,10 +76,12 @@ mPlayPause.onclick = function() {
     if ( mAudioPlayer.paused === true ) {
         mAudioPlayer.play();
         bFirstAudioStarted = true;
-        mPlayPause.style.backgroundImage = "url('./assets/img/soundsSvg/pause.svg')";
+        oIconPlay.style.opacity = 0;
+        oIconPause.style.opacity = 1;
     } else {
         mAudioPlayer.pause();
-        mPlayPause.style.backgroundImage = "url('./assets/img/soundsSvg/play.svg')";
+        oIconPlay.style.opacity = 1;
+        oIconPause.style.opacity = 0;
     }
 };
 

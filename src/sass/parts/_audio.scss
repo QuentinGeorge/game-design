@@ -54,18 +54,10 @@
 
 .play-pause {
     display: inline-block;
-    background-image: url('../assets/img/soundsSvg/play.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 60% 60%;
     padding: 5px 10px;
 }
 
 .mute {
-    background-image: url('../assets/img/soundsSvg/volume-medium.svg');
-    background-repeat: no-repeat;
-    background-position: right center;
-    background-size: 60% 60%;
     padding: 5px 0 5px 10px;
     margin-top: -5px;
 }
@@ -89,7 +81,7 @@
     display: inline-block;
     white-space: nowrap;
     overflow: hidden;
-    margin-top: -5px;
+    margin-top: -14px;
     height: 100%;
 }
 
@@ -102,4 +94,52 @@
     margin-right: 10px;
     overflow: visible;
     height: 100%;
+}
+
+.pause-play {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    padding: 5px 10px;
+    &__icon {
+        position: absolute;
+        top: 8px;
+        left: 13px;
+        &--play {
+            opacity: 1;
+        }
+        &--pause {
+            opacity: 0;
+        }
+    }
+}
+
+.volume__container {
+    display: inline-block;
+    position: relative;
+    top: -5px;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    padding: 5px 10px;
+}
+
+.volume__icon {
+    position: absolute;
+    top: 9px;
+    left: 16px;
+    &--mute {
+        opacity: 0;
+    }
+    &--low {
+        opacity: 1;
+    }
+    &--medium {
+        opacity: 1;
+    }
+    &--high {
+        opacity: 0;
+    }
 }
